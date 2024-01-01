@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String?
+  charge   Int?    @default(0)
+  payFirst Int?    @default(0)
+
+  expenditure Expenditure[]
+  userOnRoom  UserOnRoom[]
+}
+
+model Room {
+  id          Int           @id @default(autoincrement())
+  roomName    String
+  inviteRoom  String        @unique
+  limit       Int?          @default(1)
+  person      Person[]
+  expenditure Expenditure[]
+  userOnRoom  UserOnRoom[]
+  total       Total?
+}
+
+model UserOnRoom {
+  id        Int    @id @default(autoincrement())
+  idUser    Int
+  idRoom    Int
+  user      User   @relation(fields: [idUser], references: [id])
+  room      Room   @relation(fields: [idRoom], references: [id])
+  createdBy String
+}
+
+model Person {
+  id       Int    @id @default(autoincrement())
+  idRoom   Int
+  name     String
+  charge   Int?   @default(0)
+  payFirst Int?   @default(0)
+  room     Room   @relation(fields: [idRoom], references: [id])
+}
+
+model Expenditure {
+  id         Int       @id @default(autoincrement())
+  idUser     Int
+  idRoom     Int
+  item       String
+  qty        Int?      @default(1)
+  price      String
+  category   String
+  totalPrice Int
+  createAt   DateTime?
+  updateAt   DateTime?
+  user       User      @relation(fields: [idUser], references: [id])
+  room       Room      @relation(fields: [idRoom], references: [id])
+}
+
+model Total {
+  id      Int  @id @default(autoincrement())
+  balance Int
+  idRoom  Int  @unique
+  room    Room @relation(fields: [idRoom], references: [id])
+}
+
+model CategoryName {
+  id   Int    @id @default(autoincrement())
+  name String
+}
