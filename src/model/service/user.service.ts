@@ -28,7 +28,7 @@ export class UserService {
 
     return {
       status: HttpStatus.CREATED,
-      message: 'Berhasil Membuat Anggota',
+      message: 'Berhasil Membuat Member',
     };
   }
 

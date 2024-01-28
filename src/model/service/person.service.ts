@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
-import { PersonDTO, UserDTO, userOnRoomDTO } from '../DTO';
+import { PersonDTO, UserDTO, userOnRoomDTO, PersonEditDTO } from '../DTO';
 import { TotalService } from './total.service';
 import { RoomService } from './room.service';
 
@@ -59,8 +59,10 @@ export class PersonService {
 
     const memberLength = await this.getTotalPersonByIdRoom(room.id);
     const tableTotal = await this.totalService.findTotalByIdRoom(room.id);
+    console.log({ memberLength });
+    console.log({ tableTotal });
 
-    if (memberLength >= memberLength) {
+    if (memberLength >= room.limit) {
       throw new HttpException(
         'Limit Sudah Melebihi Batas 🫠',
         HttpStatus.BAD_REQUEST,
@@ -68,7 +70,6 @@ export class PersonService {
     }
 
     let charge = 0;
-    await this.editAllPerson(tableTotal.balance, memberLength + 1, room.id);
     charge =
       memberLength > 0
         ? tableTotal.balance / (memberLength + 1)
@@ -98,6 +99,8 @@ export class PersonService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    await this.editAllPerson(tableTotal.balance, memberLength, room.id);
 
     return {
       status: HttpStatus.CREATED,
