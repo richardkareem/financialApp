@@ -20,13 +20,15 @@ import { UserService } from 'src/model/Service/user.service';
 @Controller('person')
 export class PersonController {
   constructor(private personService: PersonService) {}
-  @Get()
-  async getAllMember() {
+  @Get('/:id')
+  async getAllMember(@Param('id') idRoom: string) {
     try {
-     return await this.personService.getALlPerson();
+     return await this.personService.getALlPerson(Number(idRoom));
+      
+    
     } catch (error) {
       console.log(error);
-      return error;
+      return "Room TIdak DItemukan"
     }
   }
   @Post('/:id')
@@ -47,7 +49,7 @@ export class PersonController {
   }
   @Put('/:id')
   async editPerson(@Param('id') id: string, @Body() body: PersonEditDTO) {
-    try {
+    try {      
       await this.personService.editPerson(body, Number(id));
     } catch (error) {
       console.log(error);

@@ -2,13 +2,13 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { PersonService } from './person.service';
 import { UserService } from './user.service';
+import { error } from 'console';
 
 @Injectable()
 export class RoomService {
   constructor(
     private prismaService: PrismaService,
     private userService: UserService,
-    // private personService: PersonService,
   ) {}
   async getRoomByid(idRoom: number) {
     const data = await this.prismaService.room.findUnique({
@@ -82,27 +82,37 @@ export class RoomService {
       );
     }
 
-    const user = await this.userService.getUserById(idUser);
-    const result = await Promise.all(
+    if (!data) {
+      throw new Error('DATA KOSONG');
+    }
+
+    const res = await Promise.all(
       data.map(async (item) => {
-        const room = await this.getRoomByid(item.idUser);
-        const data = {
+        const room = await this.prismaService.room.findFirst({
+          where: {
+            id: item.idRoom,
+          },
+        });
+        const user = await this.prismaService.user.findFirst({
+          where: {
+            id: item.idUser,
+          },
+        });
+        const res = {
           idRoom: item.idRoom,
           roomName: room.roomName,
           inviteRoom: room.inviteRoom,
           limit: room.limit,
+          nameUser: user.name,
         };
 
-        return data;
+        return res;
       }),
     );
 
     return {
       status: true,
-      message: {
-        user: user.name,
-        result,
-      },
+      message: res
     };
   }
 }

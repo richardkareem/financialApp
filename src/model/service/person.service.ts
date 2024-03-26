@@ -221,7 +221,33 @@ export class PersonService {
     });
   }
 
-  async getALlPerson() {
-    return this.prismaService.person.findMany();
+  async getALlPerson(idRoom: number) {
+    
+   
+
+    const checkIsRoom = await this.prismaService.room.findFirst({
+      where:{
+        id: idRoom
+      }
+    })
+
+    const room = await this.prismaService.person.findMany({
+      where:{
+        idRoom: checkIsRoom.id
+      }
+    });
+
+    console.log(checkIsRoom)
+
+    if(!checkIsRoom){
+      throw new Error("ROOM TIDAK DITEMUKAN")
+    }
+
+    console.log({room});
+    
+    return room
   }
+  
+
+
 }

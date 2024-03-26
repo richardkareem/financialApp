@@ -1,8 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
-import { userOnRoomDTO } from "../DTO/userOnRoomDTO"
+import { userOnRoomDTO } from '../DTO/userOnRoomDTO';
 import { UserDTO } from '../DTO/userDTO';
 import { TotalService } from './total.service';
+const generateUniqueId = require('generate-unique-id');
 
 @Injectable()
 export class UserService {
@@ -10,7 +11,7 @@ export class UserService {
     private prismaService: PrismaService,
     private totalService: TotalService,
   ) {}
-    
+
   async createUser(body: UserDTO) {
     if (!body.name) {
       throw new HttpException(
@@ -72,10 +73,15 @@ export class UserService {
         );
       }
 
+      const uniqueIdRoom = generateUniqueId({
+        length: 5,
+        useLetters: true,
+      });
+
       const room = await this.prismaService.room.create({
         data: {
           roomName: body.roomName,
-          inviteRoom: body.inviteRoom,
+          inviteRoom: 'RM' + uniqueIdRoom,
           limit: body.limit,
         },
       });
@@ -159,6 +165,22 @@ export class UserService {
         {
           status: false,
           message: 'Kamu Udah Join 🙂',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const userAtRoom = await this.prismaService.userOnRoom.findMany({
+      where:{
+        idRoom: room.id
+      }
+    })
+    
+    if(userAtRoom?.length >= room.limit){
+      throw new HttpException(
+        {
+          status: false,
+          message: 'Room Penuh',
         },
         HttpStatus.NOT_FOUND,
       );
